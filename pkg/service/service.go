@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/AlibekDalgat/dynamic_segmentation"
 	"github.com/AlibekDalgat/dynamic_segmentation/pkg/repository"
 )
 
@@ -8,6 +9,7 @@ type User interface {
 }
 
 type Segment interface {
+	CreateSegment(input dynamic_segmentation.SegmentInfo) (int, error)
 }
 
 type Service struct {

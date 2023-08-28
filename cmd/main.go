@@ -1,15 +1,19 @@
 package main
 
 import (
+	"context"
 	"github.com/AlibekDalgat/dynamic_segmentation"
 	"github.com/AlibekDalgat/dynamic_segmentation/pkg/handler"
 	"github.com/AlibekDalgat/dynamic_segmentation/pkg/repository"
 	"github.com/AlibekDalgat/dynamic_segmentation/pkg/service"
+	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/subosito/gotenv"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -24,12 +28,12 @@ func main() {
 		Host:     viper.GetString("db.host"),
 		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
 		DBname:   viper.GetString("db.dbname"),
 		SSLMode:  viper.GetString("db.sslmode"),
+		Password: os.Getenv("DB_PASSWORD"),
 	})
 	if err != nil {
-		logrus.Fatalf("Ошибка при инициализации базы данных: %s", err.Error())
+		logrus.Fatalf("Ошибка при инициализации базы данных: %v", err)
 	}
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
@@ -41,10 +45,22 @@ func main() {
 			logrus.Fatalf("Ошибка при запуске сервера: %s", err.Error())
 		}
 	}()
+	logrus.Println("Todo başlandı")
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	logrus.Println("Запуск сервиса")
+	if err := srv.Shutdown(context.Background()); err != nil {
+		logrus.Errorf("Ошибка при завершении работы сервера: %s", err.Error())
+	}
+	if err := db.Close(); err != nil {
+		logrus.Errorf("Ошибка при закрытии соединения с БД: %s", err.Error())
+	}
 }
 
 func initConfig() error {
 	viper.AddConfigPath("configs")
-	viper.SetConfigName("config.yml")
+	viper.SetConfigName("config")
 	return viper.ReadInConfig()
 }

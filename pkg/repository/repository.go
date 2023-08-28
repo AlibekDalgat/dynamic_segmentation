@@ -1,11 +1,15 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/AlibekDalgat/dynamic_segmentation"
+	"github.com/jmoiron/sqlx"
+)
 
 type User interface {
 }
 
 type Segment interface {
+	CreateSegment(input dynamic_segmentation.SegmentInfo) (int, error)
 }
 
 type Repository struct {

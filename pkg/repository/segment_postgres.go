@@ -1,6 +1,11 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"errors"
+	"fmt"
+	"github.com/AlibekDalgat/dynamic_segmentation"
+	"github.com/jmoiron/sqlx"
+)
 
 type SegmentPostgres struct {
 	db *sqlx.DB
@@ -8,4 +13,22 @@ type SegmentPostgres struct {
 
 func NewSegmentPostgres(db *sqlx.DB) *SegmentPostgres {
 	return &SegmentPostgres{db}
+}
+
+func (r SegmentPostgres) CreateSegment(input dynamic_segmentation.SegmentInfo) (int, error) {
+	var id, count int
+	query := fmt.Sprintf("SELECT COUNT(name) FROM %s WHERE name = $1", segmentsTable)
+	err := r.db.QueryRow(query, input.Name).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	if count > 0 {
+		return 0, errors.New("Сегмент с таким именем уже существует.")
+	}
+	query = fmt.Sprintf("INSERT INTO %s (name) values ($1) RETURNING id", segmentsTable)
+	err = r.db.QueryRow(query, input.Name).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
