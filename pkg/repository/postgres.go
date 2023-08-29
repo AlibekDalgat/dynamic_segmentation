@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	segmentsTable        = "segments"
-	usersInSegmentsTable = "users_in_segments"
+	segmentsTable            = "segments"
+	usersInSegmentsTable     = "users_in_segments"
+	deletedUsersFromSegments = "deleted_users_from_segments"
 )
 
 type Config struct {

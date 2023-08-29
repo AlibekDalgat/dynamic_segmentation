@@ -17,3 +17,7 @@ func newErrorResponse(c *gin.Context, statusCode int, message string) {
 type statusResponse struct {
 	Status string `json:"status"`
 }
+
+type referenceFile struct {
+	Reference string `json:"reference"`
+}

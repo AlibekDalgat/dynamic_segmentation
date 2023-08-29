@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AlibekDalgat/dynamic_segmentation"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
 
 type UserPostgres struct {
@@ -21,7 +22,7 @@ func (u *UserPostgres) AddToSegments(input dynamic_segmentation.UserUpdatesInfo)
 		var count int
 		query := fmt.Sprintf("SELECT COUNT(*) FROM %s "+
 			"WHERE user_id = $1 AND segment_name = $2", usersInSegmentsTable)
-		if err := u.db.QueryRow(query, input.User_id, input.AddToSegments[i].Name).Scan(&count); err != nil {
+		if err := u.db.QueryRow(query, input.UserId, input.AddToSegments[i].Name).Scan(&count); err != nil {
 			errorList = append(errorList, err)
 			continue
 		}
@@ -34,12 +35,23 @@ func (u *UserPostgres) AddToSegments(input dynamic_segmentation.UserUpdatesInfo)
 			continue
 		}
 		if count == 0 {
-			errorList = append(errorList, errors.New(fmt.Sprintf("Сегмента %s несуществует", input.AddToSegments[i].Name)))
+			errorList = append(errorList, errors.New(fmt.Sprintf("Сегмента %s несуществует",
+				input.AddToSegments[i].Name)))
 			continue
 		}
-		query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name) values ($1, $2)", usersInSegmentsTable)
-		if _, err := u.db.Exec(query, input.User_id, input.AddToSegments[i].Name); err != nil {
-			errorList = append(errorList, err)
+		if !input.AddToSegments[i].Ttl.IsZero() {
+			fmt.Println(input.AddToSegments[i].Ttl)
+			query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time, ttl) values ($1, $2, NOW(), $3)",
+				usersInSegmentsTable)
+			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name, input.AddToSegments[i].Ttl); err != nil {
+				errorList = append(errorList, err)
+			}
+		} else {
+			query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time) values ($1, $2, NOW())",
+				usersInSegmentsTable)
+			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name); err != nil {
+				errorList = append(errorList, err)
+			}
 		}
 	}
 	return errorList
@@ -48,8 +60,15 @@ func (u *UserPostgres) AddToSegments(input dynamic_segmentation.UserUpdatesInfo)
 func (u *UserPostgres) DeleteFromSegments(input dynamic_segmentation.UserUpdatesInfo) []error {
 	errorList := make([]error, 0)
 	for i := 0; i < len(input.DeleteFromSegments); i++ {
-		query := fmt.Sprintf("DELETE FROM %s WHERE user_id = $1 AND segment_name = $2", usersInSegmentsTable)
-		if _, err := u.db.Exec(query, input.User_id, input.DeleteFromSegments[i].Name); err != nil {
+		var adding_time, now_time time.Time
+		query := fmt.Sprintf("DELETE FROM %s WHERE user_id = $1 AND segment_name = $2 "+
+			"RETURNING adding_time, NOW()", usersInSegmentsTable)
+		if err := u.db.QueryRow(query, input.UserId, input.DeleteFromSegments[i].Name).Scan(&adding_time, &now_time); err != nil {
+			errorList = append(errorList, err)
+		}
+		query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time, deletion_time) values ($1, $2, $3, $4)",
+			deletedUsersFromSegments)
+		if _, err := u.db.Exec(query, input.UserId, input.DeleteFromSegments[i].Name, adding_time, now_time); err != nil {
 			errorList = append(errorList, err)
 		}
 	}
@@ -61,4 +80,27 @@ func (u *UserPostgres) GetActiveSegments(id int) ([]dynamic_segmentation.Segment
 	query := fmt.Sprintf("SELECT segment_name FROM %s WHERE user_id = $1", usersInSegmentsTable)
 	err := u.db.Select(&segmnets, query, id)
 	return segmnets, err
+}
+
+func (u *UserPostgres) GetReport(input dynamic_segmentation.DateInfo) (*sqlx.Rows, *sqlx.Rows, *sqlx.Rows, error) {
+	//var rows []dynamic_segmentation.ReportInfo
+	query := fmt.Sprintf("SELECT user_id, segment_name, adding_time as date FROM %s "+
+		"WHERE DATE_PART('year', adding_time) = $1 AND DATE_PART('month', adding_time) = $2", deletedUsersFromSegments)
+	rowsDelAdd, err := u.db.Queryx(query, input.Year, input.Month)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	query = fmt.Sprintf("SELECT user_id, segment_name, deletion_time as date FROM %s "+
+		"WHERE DATE_PART('year', deletion_time) = $1 AND DATE_PART('month', deletion_time) = $2", deletedUsersFromSegments)
+	rowsDelDel, err := u.db.Queryx(query, input.Year, input.Month)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	query = fmt.Sprintf("SELECT user_id, segment_name, adding_time as date FROM %s "+
+		"WHERE DATE_PART('year', adding_time) = $1 AND DATE_PART('month', adding_time) = $2", usersInSegmentsTable)
+	rowsAct, err := u.db.Queryx(query, input.Year, input.Month)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return rowsDelAdd, rowsDelDel, rowsAct, nil
 }

@@ -9,6 +9,7 @@ type User interface {
 	AddToSegments(input dynamic_segmentation.UserUpdatesInfo) []error
 	DeleteFromSegments(input dynamic_segmentation.UserUpdatesInfo) []error
 	GetActiveSegments(id int) ([]dynamic_segmentation.SegmentInfo, error)
+	GetReport(input dynamic_segmentation.DateInfo) (*sqlx.Rows, *sqlx.Rows, *sqlx.Rows, error)
 }
 
 type Segment interface {

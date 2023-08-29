@@ -47,3 +47,18 @@ func (h *Handler) getActiveSegments(c *gin.Context) {
 	})
 
 }
+
+func (h *Handler) getReport(c *gin.Context) {
+	var input dynamic_segmentation.DateInfo
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	file, err := h.services.GetReport(input)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+	c.JSON(http.StatusOK, referenceFile{
+		Reference: file.Name(),
+	})
+}

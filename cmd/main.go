@@ -45,12 +45,12 @@ func main() {
 			logrus.Fatalf("Ошибка при запуске сервера: %s", err.Error())
 		}
 	}()
-	logrus.Println("Todo başlandı")
+	logrus.Println("Запуск сервиса")
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
-	logrus.Println("Запуск сервиса")
+	logrus.Println("Завершение сервиса")
 	if err := srv.Shutdown(context.Background()); err != nil {
 		logrus.Errorf("Ошибка при завершении работы сервера: %s", err.Error())
 	}

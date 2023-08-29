@@ -27,9 +27,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			user.PUT("/", h.updateSegsToUser)
 			user.GET("/:user_id", h.getActiveSegments)
+			user.GET("/", h.getReport)
 		}
 
 	}
-
 	return router
 }
