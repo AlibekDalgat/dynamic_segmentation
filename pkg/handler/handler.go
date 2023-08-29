@@ -25,7 +25,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 		user := api.Group("user")
 		{
-			user.PUT("/", h.newSegsToUser)
+			user.PUT("/", h.updateSegsToUser)
 			user.GET("/:user_id", h.getActiveSegments)
 		}
 

@@ -20,3 +20,10 @@ func (s *ServSegment) CreateSegment(input dynamic_segmentation.SegmentInfo) (int
 	}
 	return s.repo.CreateSegment(input)
 }
+
+func (s *ServSegment) DeleteSegment(input dynamic_segmentation.SegmentInfo) error {
+	if input.Name == "" {
+		return errors.New("Отсутствует имя сегмента")
+	}
+	return s.repo.DeleteSegment(input)
+}

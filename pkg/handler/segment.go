@@ -21,6 +21,18 @@ func (h *Handler) createSegment(c *gin.Context) {
 		"id": id,
 	})
 }
-func (h *Handler) deleteSegment(g *gin.Context) {
-
+func (h *Handler) deleteSegment(c *gin.Context) {
+	var input dynamic_segmentation.SegmentInfo
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	err := h.services.Segment.DeleteSegment(input)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, statusResponse{
+		Status: "ok",
+	})
 }
