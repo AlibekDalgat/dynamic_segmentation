@@ -17,14 +17,20 @@ type Segment interface {
 	DeleteSegment(input dynamic_segmentation.SegmentInfo) error
 }
 
+type Background interface {
+	DeleteExpirated() error
+}
+
 type Repository struct {
 	User
 	Segment
+	Background
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		User:    NewUserPostgres(db),
-		Segment: NewSegmentPostgres(db),
+		User:       NewUserPostgres(db),
+		Segment:    NewSegmentPostgres(db),
+		Background: NewBackgroundPostgres(db),
 	}
 }

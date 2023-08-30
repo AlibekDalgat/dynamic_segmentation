@@ -8,27 +8,30 @@ import (
 	"github.com/jmoiron/sqlx"
 	"os"
 	"strconv"
+	"time"
 )
 
-type ServUser struct {
+type UserService struct {
 	repo repository.User
 }
 
-func NewUserService(repo repository.User) *ServUser {
-	return &ServUser{repo}
+func NewUserService(repo repository.User) *UserService {
+	return &UserService{repo}
 }
 
-func (u *ServUser) AddToSegments(input dynamic_segmentation.UserUpdatesInfo) []error {
+func (u *UserService) AddToSegments(input dynamic_segmentation.UserUpdatesInfo) []error {
 	if len(input.AddToSegments) == 0 {
 		return nil
 	}
 	var cleanSegmentsInfo []dynamic_segmentation.SegmentInfo
 	errorList := make([]error, 0)
 	for _, segmentInfo := range input.AddToSegments {
-		if segmentInfo.Name != "" {
-			cleanSegmentsInfo = append(cleanSegmentsInfo, segmentInfo)
-		} else {
+		if segmentInfo.Name == "" {
 			errorList = append(errorList, errors.New("Отсутствует имя сегмента"))
+		} else if !segmentInfo.Ttl.IsZero() && segmentInfo.Ttl.Before(time.Now()) {
+			errorList = append(errorList, errors.New("Заданый TTL меньше актуального времени"))
+		} else {
+			cleanSegmentsInfo = append(cleanSegmentsInfo, segmentInfo)
 		}
 	}
 	input.AddToSegments = cleanSegmentsInfo
@@ -36,7 +39,7 @@ func (u *ServUser) AddToSegments(input dynamic_segmentation.UserUpdatesInfo) []e
 	return errorList
 }
 
-func (u *ServUser) DeleteFromSegments(input dynamic_segmentation.UserUpdatesInfo) []error {
+func (u *UserService) DeleteFromSegments(input dynamic_segmentation.UserUpdatesInfo) []error {
 	if len(input.DeleteFromSegments) == 0 {
 		return nil
 	}
@@ -54,11 +57,11 @@ func (u *ServUser) DeleteFromSegments(input dynamic_segmentation.UserUpdatesInfo
 	return errorList
 }
 
-func (u *ServUser) GetActiveSegments(id int) ([]dynamic_segmentation.SegmentInfo, error) {
+func (u *UserService) GetActiveSegments(id int) ([]dynamic_segmentation.SegmentInfo, error) {
 	return u.repo.GetActiveSegments(id)
 }
 
-func (u *ServUser) GetReport(input dynamic_segmentation.DateInfo) (*os.File, error) {
+func (u *UserService) GetReport(input dynamic_segmentation.DateInfo) (*os.File, error) {
 	if input.Month > 12 || input.Month < 1 {
 		return nil, errors.New("Некорректный ввод месяца")
 	}

@@ -18,14 +18,20 @@ type Segment interface {
 	DeleteSegment(input dynamic_segmentation.SegmentInfo) error
 }
 
+type Background interface {
+	DeleteExpirated() error
+}
+
 type Service struct {
 	User
 	Segment
+	Background
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		User:    NewUserService(repos),
-		Segment: NewSegmentService(repos),
+		User:       NewUserService(repos),
+		Segment:    NewSegmentService(repos),
+		Background: NewBackgroundService(repos),
 	}
 }

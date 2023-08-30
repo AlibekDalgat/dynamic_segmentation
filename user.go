@@ -19,3 +19,10 @@ type ReportInfo struct {
 	Operation   string    `json:"operation" db:"operation"`
 	Date        time.Time `json:"date" db:"date"`
 }
+
+type AutoDeletionInfo struct {
+	UserId       int       `db:"user_id"`
+	SegmentName  string    `db:"segment_name"`
+	AddingTime   time.Time `db:"adding_time"`
+	DeletionTime time.Time `db:"deletion_time"`
+}

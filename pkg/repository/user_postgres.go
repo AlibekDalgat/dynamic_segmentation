@@ -40,16 +40,15 @@ func (u *UserPostgres) AddToSegments(input dynamic_segmentation.UserUpdatesInfo)
 			continue
 		}
 		if !input.AddToSegments[i].Ttl.IsZero() {
-			fmt.Println(input.AddToSegments[i].Ttl)
-			query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time, ttl) values ($1, $2, NOW(), $3)",
+			query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time, ttl) values ($1, $2, $3, $4)",
 				usersInSegmentsTable)
-			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name, input.AddToSegments[i].Ttl); err != nil {
+			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name, time.Now(), input.AddToSegments[i].Ttl); err != nil {
 				errorList = append(errorList, err)
 			}
 		} else {
-			query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time) values ($1, $2, NOW())",
+			query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time) values ($1, $2, $3)",
 				usersInSegmentsTable)
-			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name); err != nil {
+			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name, time.Now()); err != nil {
 				errorList = append(errorList, err)
 			}
 		}
@@ -60,17 +59,28 @@ func (u *UserPostgres) AddToSegments(input dynamic_segmentation.UserUpdatesInfo)
 func (u *UserPostgres) DeleteFromSegments(input dynamic_segmentation.UserUpdatesInfo) []error {
 	errorList := make([]error, 0)
 	for i := 0; i < len(input.DeleteFromSegments); i++ {
+		tx, err := u.db.Begin()
+		if err != nil {
+			errorList = append(errorList, err)
+			return errorList
+		}
 		var adding_time, now_time time.Time
 		query := fmt.Sprintf("DELETE FROM %s WHERE user_id = $1 AND segment_name = $2 "+
-			"RETURNING adding_time, NOW()", usersInSegmentsTable)
-		if err := u.db.QueryRow(query, input.UserId, input.DeleteFromSegments[i].Name).Scan(&adding_time, &now_time); err != nil {
+			"RETURNING adding_time", usersInSegmentsTable)
+		if err = tx.QueryRow(query, input.UserId, input.DeleteFromSegments[i].Name).Scan(&adding_time); err != nil {
+			tx.Rollback()
 			errorList = append(errorList, err)
+			continue
 		}
+		now_time = time.Now()
 		query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time, deletion_time) values ($1, $2, $3, $4)",
 			deletedUsersFromSegments)
-		if _, err := u.db.Exec(query, input.UserId, input.DeleteFromSegments[i].Name, adding_time, now_time); err != nil {
+		if _, err = tx.Exec(query, input.UserId, input.DeleteFromSegments[i].Name, adding_time, now_time); err != nil {
+			tx.Rollback()
 			errorList = append(errorList, err)
+			continue
 		}
+		tx.Commit()
 	}
 	return errorList
 }

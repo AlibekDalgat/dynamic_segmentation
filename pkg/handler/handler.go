@@ -14,6 +14,7 @@ func NewHandler(s *service.Service) *Handler {
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
+	h.DeleteExpirated()
 	router := gin.New()
 	api := router.Group("/api")
 	{

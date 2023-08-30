@@ -11,6 +11,7 @@ func (h *Handler) updateSegsToUser(c *gin.Context) {
 	var input dynamic_segmentation.UserUpdatesInfo
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
 	}
 	errAdd, errDel := h.services.User.AddToSegments(input), h.services.User.DeleteFromSegments(input)
 	if len(errAdd) != 0 || len(errDel) != 0 {
