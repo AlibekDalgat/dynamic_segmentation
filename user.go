@@ -2,6 +2,10 @@ package dynamic_segmentation
 
 import "time"
 
+type UserInfo struct {
+	UserId int `db:"user_id"`
+}
+
 type UserUpdatesInfo struct {
 	UserId             int           `json:"user_id"`
 	AddToSegments      []SegmentInfo `json:"add_to_segments"`

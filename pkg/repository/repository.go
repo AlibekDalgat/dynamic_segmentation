@@ -15,6 +15,7 @@ type User interface {
 type Segment interface {
 	CreateSegment(input dynamic_segmentation.SegmentInfo) (int, error)
 	DeleteSegment(input dynamic_segmentation.SegmentInfo) error
+	CreateSegmentWihtPercent(percent int, input dynamic_segmentation.SegmentInfo) (int, error)
 }
 
 type Background interface {

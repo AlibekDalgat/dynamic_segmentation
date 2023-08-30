@@ -21,6 +21,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		segment := api.Group("segment")
 		{
 			segment.POST("/", h.createSegment)
+			segment.POST("/:per", h.createSegmentWihtercent)
 			segment.DELETE("/", h.deleteSegment)
 		}
 

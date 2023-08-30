@@ -114,3 +114,13 @@ func (u *UserPostgres) GetReport(input dynamic_segmentation.DateInfo) (*sqlx.Row
 	}
 	return rowsDelAdd, rowsDelDel, rowsAct, nil
 }
+
+func (s *SegmentPostgres) AddOneToSement(userId int, segmentName string) error {
+	query := fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time) values ($1, $2, $3)",
+		usersInSegmentsTable)
+	_, err := s.db.Exec(query, userId, segmentName, time.Now())
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -27,3 +27,10 @@ func (s *SegmentService) DeleteSegment(input dynamic_segmentation.SegmentInfo) e
 	}
 	return s.repo.DeleteSegment(input)
 }
+
+func (s *SegmentService) CreateSegmentWihtPercent(percent int, input dynamic_segmentation.SegmentInfo) (int, error) {
+	if percent <= 0 || percent > 100 {
+		return 0, errors.New("Неправильно ввёдены проценты")
+	}
+	return s.repo.CreateSegmentWihtPercent(percent, input)
+}
