@@ -147,10 +147,14 @@ $ curl --location --request GET 'localhost:8000/api/user/1004' \
 ```
 **Тело ответа:**
 ```
-{
-    "name":"myFristSegment",
-    "ttl":"0001-01-01T00:00:00Z"
-}
+[
+    {
+        "name":"myFristSegment",
+    },
+    {
+        "name":"mySecondSegment",
+    }
+]
 ```
 
 
