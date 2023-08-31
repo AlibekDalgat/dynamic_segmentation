@@ -37,7 +37,7 @@ func (s *SegmentPostgres) CreateSegment(input dynamic_segmentation.SegmentInfo) 
 func (s *SegmentPostgres) DeleteSegment(input dynamic_segmentation.SegmentInfo) error {
 	tx, err := s.db.Begin()
 	query := fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time, deletion_time) SELECT user_id, segment_name, adding_time, $1 FROM %s WHERE segment_name = $2", deletedUsersFromSegments, usersInSegmentsTable)
-	_, err = tx.Exec(query, time.Now(), input.Name)
+	_, err = tx.Exec(query, time.Now().In(loc), input.Name)
 	if err != nil {
 		tx.Rollback()
 		return err

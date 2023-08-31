@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
 
 const (
@@ -10,6 +11,8 @@ const (
 	usersInSegmentsTable     = "users_in_segments"
 	deletedUsersFromSegments = "deleted_users_from_segments"
 )
+
+var loc *time.Location
 
 type Config struct {
 	Host     string
@@ -27,7 +30,11 @@ func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	if err := db.Ping(); err != nil {
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+	loc, err = loadLocation("Europe/Moscow")
+	if err != nil {
 		return nil, err
 	}
 	return db, nil

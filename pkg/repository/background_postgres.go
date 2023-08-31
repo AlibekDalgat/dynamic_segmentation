@@ -19,7 +19,7 @@ func NewBackgroundPostgres(db *sqlx.DB) *BackgroundPostgres {
 func (b *BackgroundPostgres) DeleteExpirated() error {
 	query := fmt.Sprintf("DELETE FROM %s WHERE ttl < $1 RETURNING user_id, segment_name, adding_time, $1 as deletion_time",
 		usersInSegmentsTable)
-	rows, err := b.db.Queryx(query, time.Now())
+	rows, err := b.db.Queryx(query, time.Now().In(loc))
 	if err != nil {
 		return err
 	}

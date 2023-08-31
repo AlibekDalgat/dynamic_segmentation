@@ -42,13 +42,13 @@ func (u *UserPostgres) AddToSegments(input dynamic_segmentation.UserUpdatesInfo)
 		if !input.AddToSegments[i].Ttl.IsZero() {
 			query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time, ttl) values ($1, $2, $3, $4)",
 				usersInSegmentsTable)
-			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name, time.Now(), input.AddToSegments[i].Ttl); err != nil {
+			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name, time.Now().In(loc), input.AddToSegments[i].Ttl); err != nil {
 				errorList = append(errorList, err)
 			}
 		} else {
 			query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time) values ($1, $2, $3)",
 				usersInSegmentsTable)
-			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name, time.Now()); err != nil {
+			if _, err := u.db.Exec(query, input.UserId, input.AddToSegments[i].Name, time.Now().In(loc)); err != nil {
 				errorList = append(errorList, err)
 			}
 		}
@@ -72,7 +72,7 @@ func (u *UserPostgres) DeleteFromSegments(input dynamic_segmentation.UserUpdates
 			errorList = append(errorList, err)
 			continue
 		}
-		now_time = time.Now()
+		now_time = time.Now().In(loc)
 		query = fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time, deletion_time) values ($1, $2, $3, $4)",
 			deletedUsersFromSegments)
 		if _, err = tx.Exec(query, input.UserId, input.DeleteFromSegments[i].Name, adding_time, now_time); err != nil {
@@ -118,7 +118,7 @@ func (u *UserPostgres) GetReport(input dynamic_segmentation.DateInfo) (*sqlx.Row
 func (s *SegmentPostgres) AddOneToSement(userId int, segmentName string) error {
 	query := fmt.Sprintf("INSERT INTO %s (user_id, segment_name, adding_time) values ($1, $2, $3)",
 		usersInSegmentsTable)
-	_, err := s.db.Exec(query, userId, segmentName, time.Now())
+	_, err := s.db.Exec(query, userId, segmentName, time.Now().In(loc))
 	if err != nil {
 		return err
 	}
