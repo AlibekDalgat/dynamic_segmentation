@@ -16,6 +16,13 @@ import (
 	"syscall"
 )
 
+// @title Dynamic Segmentation API
+// @version 1.0
+// @description API Server for dynamic user segmentation
+
+// @host localhost:8000
+// @BasePath /
+
 func main() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 	if err := initConfig(); err != nil {

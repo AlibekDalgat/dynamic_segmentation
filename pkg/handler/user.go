@@ -7,6 +7,18 @@ import (
 	"strconv"
 )
 
+// @Summary Update user
+// @Tags users
+// @Description update inof about segments of user
+// @ID update-segments-for-user
+// @Accept  json
+// @Produce  json
+// @Param input body dynamic_segmentation.UserUpdatesInfo true "user update info"
+// @Success 200 {object} statusResponse
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/user/ [put]
 func (h *Handler) updateSegsToUser(c *gin.Context) {
 	var input dynamic_segmentation.UserUpdatesInfo
 	if err := c.BindJSON(&input); err != nil {
@@ -32,6 +44,16 @@ type getActiveSegments struct {
 	Segments []dynamic_segmentation.SegmentInfo `json:"segments"`
 }
 
+// @Summary Get active segments
+// @Tags users
+// @Description get active segments of user
+// @ID get-active-segments
+// @Produce  json
+// @Success 200 {object} []dynamic_segmentation.SegmentInfo
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/user/:user_id [get]
 func (h *Handler) getActiveSegments(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
@@ -49,6 +71,17 @@ func (h *Handler) getActiveSegments(c *gin.Context) {
 
 }
 
+// @Summary Get report
+// @Tags users
+// @Description get report
+// @ID get-report
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} referenceFile
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/user/ [post]
 func (h *Handler) getReport(c *gin.Context) {
 	var input dynamic_segmentation.DateInfo
 	if err := c.BindJSON(&input); err != nil {

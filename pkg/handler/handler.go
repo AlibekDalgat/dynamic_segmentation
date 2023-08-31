@@ -1,9 +1,15 @@
 package handler
 
 import (
+	_ "github.com/AlibekDalgat/dynamic_segmentation/docs"
 	"github.com/AlibekDalgat/dynamic_segmentation/pkg/service"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 )
+
+// gin-swagger middleware
+// swagger embed files
 
 type Handler struct {
 	services *service.Service
@@ -14,8 +20,10 @@ func NewHandler(s *service.Service) *Handler {
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
+
 	h.DeleteExpirated()
 	router := gin.New()
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	api := router.Group("/api")
 	{
 		segment := api.Group("segment")
@@ -29,7 +37,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			user.PUT("/", h.updateSegsToUser)
 			user.GET("/:user_id", h.getActiveSegments)
-			user.GET("/", h.getReport)
+			user.POST("/", h.getReport)
 		}
 
 	}

@@ -7,6 +7,18 @@ import (
 	"strconv"
 )
 
+// @Summary Create segment
+// @Tags segments
+// @Description create segment
+// @ID create-segment
+// @Accept  json
+// @Produce  json
+// @Param input body dynamic_segmentation.SegmentInfo true "segment info"
+// @Success 200 {integer} integer 1
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/segment [post]
 func (h *Handler) createSegment(c *gin.Context) {
 	var input dynamic_segmentation.SegmentInfo
 	if err := c.BindJSON(&input); err != nil {
@@ -22,6 +34,19 @@ func (h *Handler) createSegment(c *gin.Context) {
 		"id": id,
 	})
 }
+
+// @Summary Delete segment
+// @Tags segments
+// @Description delete segment
+// @ID delete-segment
+// @Accept  json
+// @Produce  json
+// @Param input body dynamic_segmentation.SegmentInfo true "segment info"
+// @Success 200 {object} statusResponse
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/segment [delete]
 func (h *Handler) deleteSegment(c *gin.Context) {
 	var input dynamic_segmentation.SegmentInfo
 	if err := c.BindJSON(&input); err != nil {
@@ -38,6 +63,18 @@ func (h *Handler) deleteSegment(c *gin.Context) {
 	})
 }
 
+// @Summary Create segment
+// @Tags segments
+// @Description create segment
+// @ID create-segment-with-percent
+// @Accept  json
+// @Produce  json
+// @Param input body dynamic_segmentation.SegmentInfo true "segment info"
+// @Success 200 {integer} integer 1
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/segment/:per [post]
 func (h *Handler) createSegmentWihtercent(c *gin.Context) {
 	percent, err := strconv.Atoi(c.Param("per"))
 	if err != nil {
