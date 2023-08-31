@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
 type User interface {
 	AddToSegments(input dynamic_segmentation.UserUpdatesInfo) []error
 	DeleteFromSegments(input dynamic_segmentation.UserUpdatesInfo) []error

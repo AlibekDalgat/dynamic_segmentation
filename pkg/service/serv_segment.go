@@ -15,16 +15,10 @@ func NewSegmentService(repo repository.Segment) *SegmentService {
 }
 
 func (s *SegmentService) CreateSegment(input dynamic_segmentation.SegmentInfo) (int, error) {
-	if input.Name == "" {
-		return 0, errors.New("Отсутствует имя сегмента")
-	}
 	return s.repo.CreateSegment(input)
 }
 
 func (s *SegmentService) DeleteSegment(input dynamic_segmentation.SegmentInfo) error {
-	if input.Name == "" {
-		return errors.New("Отсутствует имя сегмента")
-	}
 	return s.repo.DeleteSegment(input)
 }
 

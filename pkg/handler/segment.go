@@ -10,7 +10,7 @@ import (
 func (h *Handler) createSegment(c *gin.Context) {
 	var input dynamic_segmentation.SegmentInfo
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 	id, err := h.services.Segment.CreateSegment(input)
@@ -25,7 +25,7 @@ func (h *Handler) createSegment(c *gin.Context) {
 func (h *Handler) deleteSegment(c *gin.Context) {
 	var input dynamic_segmentation.SegmentInfo
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, http.StatusBadRequest, "invalid input body")
 		return
 	}
 	err := h.services.Segment.DeleteSegment(input)
